@@ -17,7 +17,7 @@
   <meta name="description" content="">
   <meta name="author" content="John Doe">
   <meta name="keywords" content="">
-  <title>Android 端关于WebView历史记录进退栈遇到的坑 - Hexo</title>
+  <title>Hexo</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -160,8 +160,8 @@
               
   <div class="mt-3 post-meta">
     <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-    <time datetime="2020-08-26 10:11" pubdate>
-      August 26, 2020 am
+    <time datetime="2020-08-28 15:21" pubdate>
+      August 28, 2020 pm
     </time>
   </div>
 
@@ -171,7 +171,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      10 字
+      354 字
     </span>
   
 
@@ -181,7 +181,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      1
+      4
        分钟
     </span>
   
@@ -211,10 +211,44 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">Android 端关于WebView历史记录进退栈遇到的坑</h1>
+            <h1 style="display: none"></h1>
             
             <div class="markdown-body" id="post-body">
-              <h2 id="今晚开始记录，未完待续。。"><a href="#今晚开始记录，未完待续。。" class="headerlink" title="今晚开始记录，未完待续。。"></a>今晚开始记录，未完待续。。</h2>
+              <h1 id="Android-端关于WebView历史记录进退栈遇到的坑"><a href="#Android-端关于WebView历史记录进退栈遇到的坑" class="headerlink" title="Android 端关于WebView历史记录进退栈遇到的坑"></a>Android 端关于WebView历史记录进退栈遇到的坑</h1><p> 因为要做一个类似于Chrome浏览器那样的功能，即有多个Tab标签网页，其中有一个功能需要实现，就是webview中的历史进退栈，即记录用户在同一个tab上面访问的网站的进退栈，像下一页，或者上一页的进退栈信息的记录。而webview为我们提供了copyBackForwardList()方法，可以拿到目前webview记录的进退栈信息, 该方法返回WebBackForwardList的一个对象，我们看一下WebBackForwardList的源码（我去除了注释）：</p>
+<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WebBackForwardList</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Cloneable</span>, <span class="hljs-title">Serializable</span> </span>&#123;
+    
+    <span class="hljs-meta">@Nullable</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> WebHistoryItem <span class="hljs-title">getCurrentItem</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getCurrentIndex</span><span class="hljs-params">()</span></span>;
+    
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> WebHistoryItem <span class="hljs-title">getItemAtIndex</span><span class="hljs-params">(<span class="hljs-keyword">int</span> index)</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getSize</span><span class="hljs-params">()</span></span>;
+    
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> WebBackForwardList <span class="hljs-title">clone</span><span class="hljs-params">()</span></span>;
+&#125;</code></pre>
+<p>其中可以看到WebBackForwardList中存储的类型是WebHistoryItem，我们再看下WebHistoryItem的源码（同样去除注释）：</p>
+<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WebHistoryItem</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Cloneable</span> </span>&#123;
+    
+    <span class="hljs-meta">@SystemApi</span>
+    <span class="hljs-meta">@Deprecated</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> String <span class="hljs-title">getUrl</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> String <span class="hljs-title">getOriginalUrl</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> String <span class="hljs-title">getTitle</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-meta">@Nullable</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> Bitmap <span class="hljs-title">getFavicon</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> WebHistoryItem <span class="hljs-title">clone</span><span class="hljs-params">()</span></span>;
+&#125;</code></pre>
+<p>在这里我们可以看到记录着url，title、favicon等信息都有。下面是我随便浏览了几个页面调用copyBackForwardList的结果：<br><img src="1.png" srcset="/keyboardman.github.io/img/loading.gif"></p>
+<p>嗯，就用webview的这一套来记录进退历史记录吧。可是仔细一想，那如果我退出程序了这些进退栈还保留着吗？通过自己的亲测，如果webview被销毁，copyBackForwardList中的数据就会丢失。</p>
+
             </div>
             <hr>
             <div>
@@ -233,12 +267,6 @@
                   </article>
                   <article class="post-next col-6">
                     
-                    
-                      <a href="/keyboardman.github.io/2020/08/26/hello-world/">
-                        <span class="hidden-mobile">Hello World</span>
-                        <span class="visible-mobile">Next</span>
-                        <i class="iconfont icon-arrowright"></i>
-                      </a>
                     
                   </article>
                 </div>
@@ -374,7 +402,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "Android 端关于WebView历史记录进退栈遇到的坑&nbsp;",
+        "&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
